@@ -4,7 +4,9 @@ These files and scripts are meant to configure an HTPC system so that it can run
 This was installed on Arch Linux.
 
 Applications currently controlled:
-* MPD (to play audio, controlled from Smartphone/tablet/...)
+* MPD (to play audio, controlled using the IR remote, or natively also from Smartphone/tablet/...)
+  * With visualization effects using ProjectM
+  * with album cover art display using `bum`
 * Kodi for video
 * System shutdown
 
