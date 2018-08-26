@@ -6,9 +6,10 @@ import re
 import signal
 import time
 
-#auto_start = None
-auto_start = 'KEY_1'
+auto_start = None
+#auto_start = 'KEY_1'
 
+default_audio_profile = "output:hdmi-surround"
 debounce = 2;
 pattern = re.compile("\S+\s+(\d+)\s+(\S+)")
 
@@ -21,50 +22,37 @@ def dpms(state):
 		os.system("xset dpms 0 0 0")
 		os.system("xset s off")
 
-def visualization_start():
-	proc = subprocess.Popen(['projectM-pulseaudio'], shell=False, preexec_fn=os.setsid)
-	# Maximize by sending 'f' key to the app (its Fullscreen setting in .projectM/config.inp didn't work)
-	time.sleep(1)
-	os.system("xdotool search --name projectM key f")
-	return proc
-
-def visualization_stop(visu_ctx):
-	visu_ctx.kill()
-	visu_ctx.terminate()
-
 def shutdown_start():
 	os.system("systemctl poweroff")
 
-class mpd_ctx:
-	def __init__(self):
-		self.mpd_ctx = None
-		self.visu_ctx = None
-
-def mpd_stop(ctx):
-	visualization_stop(ctx.visu_ctx)
-	subprocess.Popen('killall mpd', shell=True)
-	ctx.mpd_ctx.kill()
-	ctx.mpd_ctx.terminate()
-	ctx.visu_ctx = None
-	dpms(1)
+def pulse_set_profile(audio_profile):
+	subprocess.Popen('pactl set-card-profile 0 '+audio_profile, shell=True)
 
 def mpd_start():
 	dpms(0)
-	ctx = mpd_ctx()
-	ctx.mpd_ctx = subprocess.Popen(['mpd'], shell=False, preexec_fn=os.setsid)
-	ctx.visu_ctx = visualization_start()
-	print("MPD ctx", ctx)
-	return ctx
+	irw_stop()
+	pulse_set_profile(default_audio_profile)
+	os.system("./run_mpd.py")
+	dpms(1)
+	irw_run()
 
 def kodi_start():
 	irw_stop()
+	os.system("bash -c \"sleep 2; xdotool search --name kodi key super+f\" &")
 	os.system("kodi")
+	irw_run()
+
+def n64_start():
+	irw_stop()
+	os.system("emulationstation")
 	irw_run()
 
 actions = dict()
 
-actions['KEY_1'] = [ "MPD", mpd_start, mpd_stop ]
+actions['KEY_1'] = [ "MPD", mpd_start, None ]
 actions['KEY_2'] = [ "Kodi", kodi_start, None ]
+actions['KEY_3'] = [ "MUPEN64PLUS", n64_start, None ]
+#actions['KEY_4'] = [ "MPD Zone2", lambda: mpd_start("output:analog-stereo"), mpd_stop ]
 actions['KEY_0'] = [ "System Shutdown", shutdown_start, None ]
 
 
@@ -80,6 +68,7 @@ def menu():
 def start_activity():
 	global cur_ctx
 	print("Starting ", cur[0])
+	print("XDG_RUNTIME_DIR="+os.environ['XDG_RUNTIME_DIR'])
 	cur_ctx = cur[1]()
 
 def stop_activity():
