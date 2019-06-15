@@ -35,7 +35,7 @@ fi
 # Set ALSA volume in case we want to play MAME, etc.
 amixer sset Master unmute
 
-pulseaudio --start
+#pulseaudio --start
 
 #This is needed so Kodi can do Shutdown, Supend
 /usr/bin/dbus-daemon --session --address=systemd: --nofork --nopidfile --systemd-activation &

@@ -110,6 +110,7 @@ actions['KEY_NEXT'] = mpd_control.mpc_next
 actions['KEY_PREVIOUS'] = mpd_control.mpc_prev
 actions['KEY_PLAY'] = mpd_control.mpc_play
 actions['KEY_PAUSE'] = mpd_control.mpc_pause
+actions['KEY_STOP'] = mpd_control.mpc_pause
 actions['KEY_FORWARD'] = lambda: mpd_control.mpc_seek("+5%")
 actions['KEY_REWIND'] = lambda: mpd_control.mpc_seek("-5%")
 
